@@ -171,7 +171,7 @@ Separate threads are declared so log output for multi-thread.
 
 In the example
 
-test class:
+test class ```Counter```:
 ```kotlin
 class Counter(var num: Int = 0) {
     fun inc(){
@@ -187,6 +187,7 @@ class Counter(var num: Int = 0) {
 
 setup:
 ```kotlin
+    //in MainActivity..
     private fun testSynchronized(){
         Log.d("", "availableProcessors(): ${Runtime.getRuntime().availableProcessors()}")
 
@@ -235,3 +236,33 @@ setup:
     }
 ```
 
+log output for non-synchronized method:
+```
+D/: obj.num: 276811 (not synchronized) 
+D/: obj.num: 225330 (not synchronized) 
+D/: obj.num: 243940 (not synchronized) 
+D/: obj.num: 209762 (not synchronized) 
+D/: obj.num: 204982 (not synchronized) 
+D/: obj.num: 209627 (not synchronized) 
+D/: obj.num: 215770 (not synchronized) 
+D/: obj.num: 199127 (not synchronized) 
+D/: obj.num: 240224 (not synchronized) 
+D/: obj.num: 215611 (not synchronized) 
+```
+
+As seen in the log the numbers do not match total number of loops(100000*3).
+Synchronized methods solve this problem as below.
+
+log output for synchronized method:
+```
+D/: obj.num: 300000 (synchronized)
+D/: obj.num: 300000 (synchronized)
+D/: obj.num: 300000 (synchronized)
+D/: obj.num: 300000 (synchronized)
+D/: obj.num: 300000 (synchronized)
+D/: obj.num: 300000 (synchronized)
+D/: obj.num: 300000 (synchronized)
+D/: obj.num: 300000 (synchronized)
+D/: obj.num: 300000 (synchronized)
+D/: obj.num: 300000 (synchronized)
+```
