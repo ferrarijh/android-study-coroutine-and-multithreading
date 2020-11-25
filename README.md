@@ -1,6 +1,10 @@
-# Coroutine and Multi-Threading
+# Coroutine and Multi-Threading (feat.synchronized)
 
-### Setup
+## Coroutine vs Multi-Threading
+* Different coroutine scope(`Dispatchers.IO`, `Dispatchers.Default`, `Dispatchers.Main`) means different thread
+and same contexts mean same thread - Jobs with different coroutine scope with same context run on same thread.
+
+### Setup for testing
 
 MainActivity setup:
 ```kotlin
@@ -158,3 +162,76 @@ D/: cnt1 (para) - 188808802
 D/: cnt2 (para) - 167402483
 D/: cnt3 (para) - 124909869
 ```
+
+Separate threads are declared so log output for multi-thread.
+
+## synchronized keyword
+* Solution for Race Condition.
+* When keyword `synchronized()` is used within a method, max number of total access to ANY functions within the class using keyword `synchronized` is limited to 1.
+
+In the example
+
+test class:
+```kotlin
+class Counter(var num: Int = 0) {
+    fun inc(){
+        num += 1
+    }
+    fun incSync(){
+        synchronized(this){
+            num += 1
+        }
+    }
+}
+```
+
+setup:
+```kotlin
+    private fun testSynchronized(){
+        Log.d("", "availableProcessors(): ${Runtime.getRuntime().availableProcessors()}")
+
+        val counter = Counter(0)
+
+        val threads = mutableListOf<Thread>()
+        val threadsSync = mutableListOf<Thread>()
+
+        //(not synchronized) increment integer in `obj` starting with 0
+        for(trial in 0 until 10) {
+
+            threads.clear()
+            counter.num = 0
+
+            for (i in 0..2) {
+                threads.add(Thread(Runnable {
+                    for (j in 1..100000)
+                        counter.inc()
+                }))
+                threads[i].start()
+            }
+            for (i in 0..2)
+                threads[i].join()
+
+            Log.d("", "obj.num: ${counter.num} (not synchronized) ")
+        }
+
+        //(synchronized) increment integer in `obj` starting with 0
+        for(trial in 0 until 10) {
+
+            threadsSync.clear()
+            counter.num = 0
+
+            for (i in 0..2) {
+                threadsSync.add(Thread(Runnable {
+                    for (j in 1..100000)
+                        counter.incSync()
+                }))
+                threadsSync[i].start()
+            }
+            for (i in 0..2)
+                threadsSync[i].join()
+
+            Log.d("", "obj.num: ${counter.num} (synchronized)")
+        }
+    }
+```
+

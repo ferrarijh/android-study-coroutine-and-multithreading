@@ -14,9 +14,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private val mHandler = Handler(Looper.getMainLooper())
 
-    val cnt1 = MutableLiveData(arrayOf(0))
-    val cnt2 = MutableLiveData(arrayOf(0))
-    val cnt3 = MutableLiveData(arrayOf(0))
+    private val cnt1 = MutableLiveData(arrayOf(0))
+    private val cnt2 = MutableLiveData(arrayOf(0))
+    private val cnt3 = MutableLiveData(arrayOf(0))
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,6 +25,55 @@ class MainActivity : AppCompatActivity() {
 
         setTVs()
         setBtn()
+
+        testSynchronized()
+    }
+
+    private fun testSynchronized(){
+        Log.d("", "availableProcessors(): ${Runtime.getRuntime().availableProcessors()}")
+
+        val counter = Counter(0)
+
+        val threads = mutableListOf<Thread>()
+        val threadsSync = mutableListOf<Thread>()
+
+        //(not synchronized) increment integer in `obj` starting with 0
+        for(trial in 0 until 10) {
+
+            threads.clear()
+            counter.num = 0
+
+            for (i in 0..2) {
+                threads.add(Thread(Runnable {
+                    for (j in 1..100000)
+                        counter.inc()
+                }))
+                threads[i].start()
+            }
+            for (i in 0..2)
+                threads[i].join()
+
+            Log.d("", "obj.num: ${counter.num} (not synchronized) ")
+        }
+
+        //(synchronized) increment integer in `obj` starting with 0
+        for(trial in 0 until 10) {
+
+            threadsSync.clear()
+            counter.num = 0
+
+            for (i in 0..2) {
+                threadsSync.add(Thread(Runnable {
+                    for (j in 1..100000)
+                        counter.incSync()
+                }))
+                threadsSync[i].start()
+            }
+            for (i in 0..2)
+                threadsSync[i].join()
+
+            Log.d("", "obj.num: ${counter.num} (synchronized)")
+        }
     }
 
     private fun setTVs(){
